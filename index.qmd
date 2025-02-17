@@ -105,9 +105,12 @@ rcookiesproportion <- cookies |>
 
 import pandas as pd
 cookiespy2 = (
-  cookiespy.groupby(['Ingredient','Quantity','Unit'])['Unit'].count()
-  .sort_values(ascending = False)
-  .head(20)
+    cookiespy.groupby(['Ingredient'])
+    .size()
+    .reset_index(name='number_recipes')
+    .assign(recipe_prop=lambda x: x['number_recipes'] / 209)
+    .sort_values(by='number_recipes', ascending=False)
+    .head(20)
 )
 print(cookiespy2)
 
@@ -117,11 +120,11 @@ print(cookiespy2)
 
 ```{r}
 
-rcookiesleast <- cookies |> count(Ingredient, Quantity, Unit) |>
-  arrange(desc(n))
+rcookiesleast <- rcookiesproportion |> count(Ingredient, number_recipies) |>
+  arrange(desc(number_recipies))
 
 rcookiesleast20 <- rcookiesleast |>
-  filter(n < 20)
+  filter(number_recipies < 20)
 
 ```
 
@@ -129,12 +132,12 @@ rcookiesleast20 <- rcookiesleast |>
 
 import pandas as pd
 cookiespyleast2 = (
-  cookiespy.groupby(['Ingredient','Quantity','Unit'])['Unit'].count()
-  .reset_index(name = 'n')
-  .sort_values(by = 'n', ascending = True)
+  cookiespy2.groupby(['Ingredient', 'number_recipes']).count()
+  .reset_index('number_recipes')
+  .sort_values(by = 'number_recipes', ascending = True)
 )
 
-cookiesleast20 = (cookiespyleast2[cookiespyleast2['n'] < 20])
+cookiesleast20 = (cookiespyleast2[cookiespyleast2['number_recipes'] < 20])
 print(cookiesleast20)
 
 ```
@@ -161,3 +164,5 @@ ggplot(
 [Part 1] Create at least one plot (it doesn't have to be pretty) that showcases an interesting facet of the data.
 
 [Part 2] Write 2-3 sentences about what you can learn from that plot and what directions you might want to investigate from here.
+
+- The normal ingredients like flour, eggs, and sugar, etc are the ones with the highest proportion of being used in many recipes. I might want to investigate the lower proportion ingredients to see the variability between different ingredients.
