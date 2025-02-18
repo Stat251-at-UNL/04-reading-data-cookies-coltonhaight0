@@ -12,7 +12,7 @@ First, read in the CSV data of cookie ingredients.
 Make sure that your end-result data has appropriate types for each column - these should match the types provided in the documentation in the README.md file.
 
 ```{r}
-
+library(dplyr)
 cookies <- read.csv("choc_chip_cookie_ingredients.csv")
 head(cookies |> arrange(Recipe_Index))
 
