@@ -64,7 +64,7 @@ Install both packages, and read the package documentation ([R](https://cran.r-pr
 
 #install.packages("skimr")#
 library(skimr)
-skim(cookies)
+skim_to_list(cookies)
 skim(cookies) %>%
   tibble::as_tibble()
 
@@ -73,7 +73,7 @@ skim(cookies) %>%
 ```{python}
 
 from skimpy import skim
-skim(cookiespy)
+skim(cookiespy[['Ingredient']])
 
 ```
 
@@ -94,8 +94,8 @@ library(tidyverse)
 rcookiesproportion <- cookies |>
   distinct(Recipe_Index, Ingredient) |>
   group_by(Ingredient) |>
-  summarise(number_recipies = n())|>
-  mutate(recipe_prop = number_recipies/209) |>
+  summarise(number_recipes = n())|>
+  mutate(recipe_prop = number_recipes/209) |>
   arrange(desc(recipe_prop)) |>
   top_n(20, recipe_prop)
 
@@ -105,14 +105,18 @@ rcookiesproportion <- cookies |>
 
 import pandas as pd
 cookiespy2 = (
-    cookiespy.groupby(['Ingredient'])
-    .size()
-    .reset_index(name='number_recipes')
+    cookiespy[['Recipe_Index', 'Ingredient']]
+    .drop_duplicates()
+    .groupby('Ingredient')
+    .agg(number_recipes=('Recipe_Index', 'nunique'))
+    .reset_index()
     .assign(recipe_prop=lambda x: x['number_recipes'] / 209)
-    .sort_values(by='number_recipes', ascending=False)
+    .sort_values(by='recipe_prop', ascending=False)
     .head(20)
 )
+
 print(cookiespy2)
+
 
 ```
 
@@ -120,11 +124,13 @@ print(cookiespy2)
 
 ```{r}
 
-rcookiesleast <- rcookiesproportion |> count(Ingredient, number_recipies) |>
-  arrange(desc(number_recipies))
+rcookiesleast <- rcookiesproportion |> count(Ingredient, number_recipes) |>
+  arrange(desc(number_recipes))
 
 rcookiesleast20 <- rcookiesleast |>
-  filter(number_recipies < 20)
+  filter(number_recipes < 20)
+
+cookie_string <- as.character(rcookiesleast20[, ])
 
 ```
 
@@ -139,6 +145,9 @@ cookiespyleast2 = (
 
 cookiesleast20 = (cookiespyleast2[cookiespyleast2['number_recipes'] < 20])
 print(cookiesleast20)
+
+cookies_stringpy = cookiesleast20.map(str)
+print(cookies_stringpy)
 
 ```
 
